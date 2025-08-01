@@ -91,42 +91,64 @@ vs_duel_days_data = {
     }
 }
 
-st.set_page_config(page_title="VS Duel Calculator", layout="centered")
-
-# Language options
-languages = {
-    "English": "en",
-    "Tiếng Việt": "vi",
-    "繁體中文": "zh"
+# Mapping tasks to research types
+task_to_research = {
+    "Complete 1 radar task": "Radar",
+    "Complete 1 radar Task": "Radar",
+    "Use 1-min Construction Speedup": "Speed-Up",
+    "Use 1-min Research Speedup": "Speed-Up",
+    "Use 1-min Training Speedup": "Speed-Up",
+    "Use 1-min Healing Speedup": "Speed-Up",
+    "Increasse Building power": "Building",
+    "Increase Tech Power": "Research",
+    "Train a lvl 1 unit": "Training",
+    "Train a lvl 2 unit": "Training",
+    "Train a lvl 3 unit": "Training",
+    "Train a lvl 4 unit": "Training",
+    "Train a lvl 5 unit": "Training",
+    "Train a lvl 6 unit": "Training",
+    "Train a lvl 7 unit": "Training",
+    "Train a lvl 8 unit": "Training",
+    "Train a lvl 9 unit": "Training",
+    "Train a lvl 10 unit": "Training",
+    "Elite Recruit 1 time": "Recruitment",
+    "Killed lvl 1 unit from rival": "Enemy Kills",
+    "Killed lvl 2 unit from rival": "Enemy Kills",
+    "Killed lvl 3 unit from rival": "Enemy Kills",
+    "Killed lvl 4 unit from rival": "Enemy Kills",
+    "Killed lvl 5 unit from rival": "Enemy Kills",
+    "Killed lvl 6 unit from rival": "Enemy Kills",
+    "Killed lvl 7 unit from rival": "Enemy Kills",
+    "Killed lvl 8 unit from rival": "Enemy Kills",
+    "Killed lvl 9 unit from rival": "Enemy Kills",
+    "Killed lvl 10 unit from rival": "Enemy Kills"
 }
 
-lang_choice = st.selectbox("🌐 Select Language / Chọn ngôn ngữ / 選擇語言", list(languages.keys()))
-lang = languages[lang_choice]
+st.set_page_config(page_title="VS Duel Calculator", layout="centered")
 
 # Tabs
 tab1, tab2 = st.tabs(["🔬 Research Boosts", "📆 VS Duel Day"])
 
-# Placeholder boost data
-if "boost_levels" not in st.session_state:
-    st.session_state.boost_levels = {}
+# Define 8 Research Types
+research_types = [
+    "Radar", "Speed-Up", "Duel Expert", "Building",
+    "Research", "Training", "Recruitment", "Enemy Kills"
+]
 
-# Tab 1: Research Levels
+# Store levels (0–10), convert to % boost (×5)
+if "research_levels" not in st.session_state:
+    st.session_state.research_levels = {r: 0 for r in research_types}
+
 with tab1:
     st.header("Research Boost Levels")
-    st.caption("Set your research level for tasks that receive a % bonus (0–10). Others will remain at 0%.")
-    for day_name, task_group in vs_duel_days_data.items():
-        for task in task_group:
-            unique_key = f"{day_name}_{task}_boost"
-            if task not in st.session_state.boost_levels:
-                st.session_state.boost_levels[task] = 0
-            level = st.selectbox(
-                f"{task} (Level)", list(range(0, 11)),
-                index=st.session_state.boost_levels[task],
-                key=unique_key
-            )
-            st.session_state.boost_levels[task] = level
+    for r in research_types:
+        st.session_state.research_levels[r] = st.selectbox(
+            f"{r} Research Level", list(range(0, 11)),
+            index=st.session_state.research_levels[r],
+            key=f"research_{r}"
+        )
+    st.success("All research boosts saved. Go to next tab to calculate score!")
 
-# Tab 2: Daily Calculator
 with tab2:
     st.header("VS Duel Day Calculator")
     day_selected = st.selectbox("📅 Choose Day", list(vs_duel_days_data.keys()))
@@ -137,10 +159,16 @@ with tab2:
     for task, base_points in tasks.items():
         input_key = f"{day_selected}_{task}_input"
         qty = st.number_input(f"{task}", min_value=0, value=0, step=1, key=input_key)
-        boost_pct = st.session_state.boost_levels.get(task, 0) * 5  # 5% per level
+
+        # Calculate boost %
+        boost_pct = 0
+        if task in task_to_research:
+            boost_pct += st.session_state.research_levels.get(task_to_research[task], 0) * 5
+        boost_pct += st.session_state.research_levels["Duel Expert"] * 5
+
         points = qty * base_points * (1 + boost_pct / 100)
         total_score += points
+
         st.write(f"→ {int(points):,} points (Base: {base_points} × Qty: {qty} × Boost: +{boost_pct}%)")
 
     st.success(f"🏆 Total Score for {day_selected}: {int(total_score):,} points")
-
