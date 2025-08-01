@@ -114,13 +114,17 @@ if "boost_levels" not in st.session_state:
 with tab1:
     st.header("Research Boost Levels")
     st.caption("Set your research level for tasks that receive a % bonus (0–10). Others will remain at 0%.")
-    for task_group in vs_duel_days_data.values():
+    for day_name, task_group in vs_duel_days_data.items():
         for task in task_group:
+            unique_key = f"{day_name}_{task}_boost"
             if task not in st.session_state.boost_levels:
                 st.session_state.boost_levels[task] = 0
-            st.session_state.boost_levels[task] = st.selectbox(
-                f"{task} (Level)", list(range(0, 11)), index=st.session_state.boost_levels[task], key=f"boost_{task}"
+            level = st.selectbox(
+                f"{task} (Level)", list(range(0, 11)),
+                index=st.session_state.boost_levels[task],
+                key=unique_key
             )
+            st.session_state.boost_levels[task] = level
 
 # Tab 2: Daily Calculator
 with tab2:
@@ -131,10 +135,12 @@ with tab2:
     total_score = 0
     st.subheader(f"Tasks for {day_selected}")
     for task, base_points in tasks.items():
-        qty = st.number_input(f"{task}", min_value=0, value=0, step=1, key=f"input_{task}")
+        input_key = f"{day_selected}_{task}_input"
+        qty = st.number_input(f"{task}", min_value=0, value=0, step=1, key=input_key)
         boost_pct = st.session_state.boost_levels.get(task, 0) * 5  # 5% per level
         points = qty * base_points * (1 + boost_pct / 100)
         total_score += points
         st.write(f"→ {int(points):,} points (Base: {base_points} × Qty: {qty} × Boost: +{boost_pct}%)")
 
     st.success(f"🏆 Total Score for {day_selected}: {int(total_score):,} points")
+
