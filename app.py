@@ -1,6 +1,96 @@
 
 import streamlit as st
 
+# VS Duel Day Data
+vs_duel_days_data = {
+    "Monday - Radar Training": {
+        "Use 1 Stamina": 300,
+        "Complete 1 radar task": 25000,
+        "Use 660 Hero EXP Points": 2,
+        "Use 10pts of Drone Battle Data": 6,
+        "Use 1 drone part": 5000,
+        "Gather 100 food": 30,
+        "Gather 100 Iron": 40,
+        "Gather 60 Coins": 40
+    },
+    "Tuesday - Base Expansion": {
+        "Use 1-min Construction Speedup": 125,
+        "Increasse Building power": 25,
+        "Dispatch Legendary Trade Truck": 200000,
+        "Perform Legendary Secret Task": 150000
+    },
+    "Wednesday - Age of Science": {
+        "Use 1-min Research Speedup": 125,
+        "Increase Tech Power": 25,
+        "Use 1 Valor badge": 600,
+        "Complete 1 radar Task": 25000
+    },
+    "Thursday - Train Heroes": {
+        "Elite Recruit 1 time": 3750,
+        "Use 2.000 Hero EXP Points": 6,
+        "Use Legendary Hero Shard": 20000,
+        "Use Epic Hero Shard": 7500,
+        "Use Rare Hero Shard": 2000,
+        "Use 1 Skill Medal": 20
+    },
+    "Friday - Total Mobilization": {
+        "Complete 1 radar task": 22500,
+        "Use 1-min Construction Speedup": 112,
+        "Increasse Building power": 19,
+        "Use 1-min Research Speedup": 112,
+        "Increase Tech Power": 19,
+        "Use 1-min Training Speedup": 112,
+        "Train a lvl 1 unit": 40,
+        "Train a lvl 2 unit": 60,
+        "Train a lvl 3 unit": 80,
+        "Train a lvl 4 unit": 100,
+        "Train a lvl 5 unit": 120,
+        "Train a lvl 6 unit": 140,
+        "Train a lvl 7 unit": 160,
+        "Train a lvl 8 unit": 180,
+        "Train a lvl 9 unit": 200,
+        "Train a lvl 10 unit": 220
+    },
+    "Saturday - Enemy Buster": {
+        "Dispatch Legendary Trade Truck": 175000,
+        "Perform Legendary Secret Task": 131250,
+        "Use 1-min Construction Speedup": 112,
+        "Use 1-min Research Speedup": 112,
+        "Use 1-min Training Speedup": 112,
+        "Use 1-min Healing Speedup": 112,
+        "Killed lvl 1 unit from rival": 19,
+        "Killed lvl 2 unit from rival": 29,
+        "Killed lvl 3 unit from rival": 39,
+        "Killed lvl 4 unit from rival": 48,
+        "Killed lvl 5 unit from rival": 58,
+        "Killed lvl 6 unit from rival": 68,
+        "Killed lvl 7 unit from rival": 47,
+        "Killed lvl 8 unit from rival": 87,
+        "Killed lvl 9 unit from rival": 97,
+        "Killed lvl 10 unit from rival": 107,
+        "Killed lvl 1 unit": 3,
+        "Killed lvl 2 unit": 5,
+        "Killed lvl 3 unit": 7,
+        "Killed lvl 4 unit": 9,
+        "Killed lvl 5 unit": 11,
+        "Killed lvl 6 unit": 13,
+        "Killed lvl 7 unit": 15,
+        "Killed lvl 8 unit": 17,
+        "Killed lvl 9 unit": 19,
+        "Killed lvl 10 unit": 21,
+        "Every lvl 1 unit lost": 3,
+        "Every lvl 2 unit lost": 5,
+        "Every lvl 3 unit lost": 7,
+        "Every lvl 4 unit lost": 8,
+        "Every lvl 5 unit lost": 10,
+        "Every lvl 6 unit lost": 12,
+        "Every lvl 7 unit lost": 14,
+        "Every lvl 8 unit lost": 15,
+        "Every lvl 9 unit lost": 17,
+        "Every lvl 10 unit lost": 19
+    }
+}
+
 st.set_page_config(page_title="VS Duel Calculator", layout="centered")
 
 # Language options
@@ -13,90 +103,38 @@ languages = {
 lang_choice = st.selectbox("🌐 Select Language / Chọn ngôn ngữ / 選擇語言", list(languages.keys()))
 lang = languages[lang_choice]
 
-# Translations
-text = {
-    "tabs": {
-        "research": {
-            "en": "🔬 Research Levels",
-            "vi": "🔬 Cấp Nghiên Cứu",
-            "zh": "🔬 科研等級"
-        },
-        "vs_day": {
-            "en": "📆 VS Duel Day",
-            "vi": "📆 Ngày VS",
-            "zh": "📆 VS對決日"
-        }
-    },
-    "radar_day": {
-        "en": "Monday - Radar Day",
-        "vi": "Thứ Hai - Ngày Radar",
-        "zh": "星期一 - 雷達日"
-    },
-    "construction_day": {
-        "en": "Tuesday - Construction Day",
-        "vi": "Thứ Ba - Ngày Xây Dựng",
-        "zh": "星期二 - 建設日"
-    }
-}
+# Tabs
+tab1, tab2 = st.tabs(["🔬 Research Boosts", "📆 VS Duel Day"])
 
-# Tabs for navigation
-tab1, tab2 = st.tabs([text["tabs"]["research"][lang], text["tabs"]["vs_day"][lang]])
-
-# Research multipliers storage
-if "research_boosts" not in st.session_state:
-    st.session_state.research_boosts = {
-        "Radar Task": 0,
-        "Construction Power": 0
-    }
+# Placeholder boost data
+if "boost_levels" not in st.session_state:
+    st.session_state.boost_levels = {}
 
 # Tab 1: Research Levels
 with tab1:
-    st.header(text["tabs"]["research"][lang])
+    st.header("Research Boost Levels")
+    st.caption("Set your research level for tasks that receive a % bonus (0–10). Others will remain at 0%.")
+    for task_group in vs_duel_days_data.values():
+        for task in task_group:
+            if task not in st.session_state.boost_levels:
+                st.session_state.boost_levels[task] = 0
+            st.session_state.boost_levels[task] = st.selectbox(
+                f"{task} (Level)", list(range(0, 11)), index=st.session_state.boost_levels[task], key=f"boost_{task}"
+            )
 
-    radar_level = st.selectbox("Radar Research Level (affects Radar Tasks)", list(range(0, 11)), index=0)
-    construction_level = st.selectbox("Construction Research Level (affects Building Power)", list(range(0, 11)), index=0)
-
-    st.session_state.research_boosts["Radar Task"] = radar_level * 5  # +5% per level
-    st.session_state.research_boosts["Construction Power"] = construction_level * 3  # +3% per level
-
-    st.success(f"Radar Task Bonus: +{st.session_state.research_boosts['Radar Task']}%")
-    st.success(f"Construction Power Bonus: +{st.session_state.research_boosts['Construction Power']}%")
-
-# Tab 2: VS Duel Day
+# Tab 2: Daily Calculator
 with tab2:
-    st.header(text["tabs"]["vs_day"][lang])
+    st.header("VS Duel Day Calculator")
+    day_selected = st.selectbox("📅 Choose Day", list(vs_duel_days_data.keys()))
+    tasks = vs_duel_days_data[day_selected]
 
-    day = st.selectbox("Select Day", [
-        text["radar_day"][lang],
-        text["construction_day"][lang]
-    ])
+    total_score = 0
+    st.subheader(f"Tasks for {day_selected}")
+    for task, base_points in tasks.items():
+        qty = st.number_input(f"{task}", min_value=0, value=0, step=1, key=f"input_{task}")
+        boost_pct = st.session_state.boost_levels.get(task, 0) * 5  # 5% per level
+        points = qty * base_points * (1 + boost_pct / 100)
+        total_score += points
+        st.write(f"→ {int(points):,} points (Base: {base_points} × Qty: {qty} × Boost: +{boost_pct}%)")
 
-    if day == text["radar_day"][lang]:
-        st.subheader(text["radar_day"][lang])
-        stamina_used = st.number_input("Stamina Used", min_value=0, value=0)
-        radar_tasks = st.number_input("Radar Tasks Completed", min_value=0, value=0)
-
-        stamina_points = stamina_used * 375
-        radar_base = radar_tasks * 30000
-        radar_bonus = radar_base * (st.session_state.research_boosts["Radar Task"] / 100)
-        radar_total = radar_base + radar_bonus
-
-        total_score = stamina_points + radar_total
-
-        st.metric("Total Radar Day Score", f"{total_score:,.0f} points")
-        st.caption(f"Includes +{st.session_state.research_boosts['Radar Task']}% bonus on Radar Tasks")
-
-    elif day == text["construction_day"][lang]:
-        st.subheader(text["construction_day"][lang])
-        speedup_minutes = st.number_input("Construction Speedups Used (in minutes)", min_value=0, value=0)
-        power_increase = st.number_input("Building Power Increased", min_value=0, value=0)
-
-        speedup_points = speedup_minutes * 125
-        construction_base = power_increase * 23
-        construction_bonus = construction_base * (st.session_state.research_boosts["Construction Power"] / 100)
-        construction_total = construction_base + construction_bonus
-
-        total_score = speedup_points + construction_total
-
-        st.metric("Total Construction Day Score", f"{total_score:,.0f} points")
-        st.caption(f"Includes +{st.session_state.research_boosts['Construction Power']}% bonus on Building Power")
+    st.success(f"🏆 Total Score for {day_selected}: {int(total_score):,} points")
