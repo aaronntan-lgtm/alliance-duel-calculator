@@ -1,11 +1,35 @@
 
 import streamlit as st
 
-# VS Duel Day Data
+# === Language Setup ===
+languages = {
+    "English": "en",
+    "Tiếng Việt": "vi",
+    "繁體中文": "zh"
+}
+
+lang = st.selectbox("🌐 Select Language / Chọn ngôn ngữ / 選擇語言", list(languages.keys()))
+lang_code = languages[lang]
+
+# === Translation Dictionary ===
+t = {
+    "research_tab": {"en": "🔬 Research Boosts", "vi": "🔬 Tăng Cường Nghiên Cứu", "zh": "🔬 科研加成"},
+    "duel_tab": {"en": "📆 VS Duel Day", "vi": "📆 Ngày Đấu VS", "zh": "📆 對決日"},
+    "select_day": {"en": "📅 Choose Day", "vi": "📅 Chọn Ngày", "zh": "📅 選擇日子"},
+    "boost_level": {"en": "Research Level", "vi": "Cấp Nghiên Cứu", "zh": "研究等級"},
+    "saved_msg": {"en": "All research boosts saved. Go to next tab to calculate score!",
+                  "vi": "Đã lưu tăng cường nghiên cứu. Chuyển sang tab tiếp theo để tính điểm!",
+                  "zh": "研究加成已儲存。請切換分頁進行計算！"},
+    "task_label": {"en": "Tasks for", "vi": "Nhiệm vụ cho", "zh": "任務 -"},
+    "points_label": {"en": "points", "vi": "điểm", "zh": "分數"},
+    "total_label": {"en": "🏆 Total Score for", "vi": "🏆 Tổng điểm cho", "zh": "🏆 總分 -"}
+}
+
+# === VS Duel Day Data ===
 vs_duel_days_data = {
     "Monday - Radar Training": {
-        "Use 1 Stamina": 300,
         "Complete 1 radar task": 25000,
+        "Use 1 Stamina": 300,
         "Use 660 Hero EXP Points": 2,
         "Use 10pts of Drone Battle Data": 6,
         "Use 1 drone part": 5000,
@@ -91,76 +115,56 @@ vs_duel_days_data = {
     }
 }
 
-# Mapping tasks to research types
 task_to_research = {
-    "Complete 1 radar task": "Radar",
-    "Complete 1 radar Task": "Radar",
-    "Use 1-min Construction Speedup": "Speed-Up",
-    "Use 1-min Research Speedup": "Speed-Up",
-    "Use 1-min Training Speedup": "Speed-Up",
-    "Use 1-min Healing Speedup": "Speed-Up",
-    "Increasse Building power": "Building",
-    "Increase Tech Power": "Research",
-    "Train a lvl 1 unit": "Training",
-    "Train a lvl 2 unit": "Training",
-    "Train a lvl 3 unit": "Training",
-    "Train a lvl 4 unit": "Training",
-    "Train a lvl 5 unit": "Training",
-    "Train a lvl 6 unit": "Training",
-    "Train a lvl 7 unit": "Training",
-    "Train a lvl 8 unit": "Training",
-    "Train a lvl 9 unit": "Training",
-    "Train a lvl 10 unit": "Training",
-    "Elite Recruit 1 time": "Recruitment",
-    "Killed lvl 1 unit from rival": "Enemy Kills",
-    "Killed lvl 2 unit from rival": "Enemy Kills",
-    "Killed lvl 3 unit from rival": "Enemy Kills",
-    "Killed lvl 4 unit from rival": "Enemy Kills",
-    "Killed lvl 5 unit from rival": "Enemy Kills",
-    "Killed lvl 6 unit from rival": "Enemy Kills",
-    "Killed lvl 7 unit from rival": "Enemy Kills",
-    "Killed lvl 8 unit from rival": "Enemy Kills",
-    "Killed lvl 9 unit from rival": "Enemy Kills",
-    "Killed lvl 10 unit from rival": "Enemy Kills"
+    "Complete 1 radar task": "Radar", "Complete 1 radar Task": "Radar",
+    "Use 1-min Construction Speedup": "Speed-Up", "Use 1-min Research Speedup": "Speed-Up",
+    "Use 1-min Training Speedup": "Speed-Up", "Use 1-min Healing Speedup": "Speed-Up",
+    "Increasse Building power": "Building", "Increase Tech Power": "Research",
+    "Train a lvl 1 unit": "Training", "Train a lvl 2 unit": "Training", "Train a lvl 3 unit": "Training",
+    "Train a lvl 4 unit": "Training", "Train a lvl 5 unit": "Training", "Train a lvl 6 unit": "Training",
+    "Train a lvl 7 unit": "Training", "Train a lvl 8 unit": "Training", "Train a lvl 9 unit": "Training",
+    "Train a lvl 10 unit": "Training", "Elite Recruit 1 time": "Recruitment",
+    "Killed lvl 1 unit from rival": "Enemy Kills", "Killed lvl 2 unit from rival": "Enemy Kills",
+    "Killed lvl 3 unit from rival": "Enemy Kills", "Killed lvl 4 unit from rival": "Enemy Kills",
+    "Killed lvl 5 unit from rival": "Enemy Kills", "Killed lvl 6 unit from rival": "Enemy Kills",
+    "Killed lvl 7 unit from rival": "Enemy Kills", "Killed lvl 8 unit from rival": "Enemy Kills",
+    "Killed lvl 9 unit from rival": "Enemy Kills", "Killed lvl 10 unit from rival": "Enemy Kills"
 }
 
 st.set_page_config(page_title="VS Duel Calculator", layout="centered")
 
-# Tabs
-tab1, tab2 = st.tabs(["🔬 Research Boosts", "📆 VS Duel Day"])
+tab1, tab2 = st.tabs([t["research_tab"][lang_code], t["duel_tab"][lang_code]])
 
-# Define 8 Research Types
 research_types = [
     "Radar", "Speed-Up", "Duel Expert", "Building",
     "Research", "Training", "Recruitment", "Enemy Kills"
 ]
 
-# Store levels (0–10), convert to % boost (×5)
 if "research_levels" not in st.session_state:
     st.session_state.research_levels = {r: 0 for r in research_types}
 
 with tab1:
-    st.header("Research Boost Levels")
+    st.header(t["research_tab"][lang_code])
     for r in research_types:
         st.session_state.research_levels[r] = st.selectbox(
-            f"{r} Research Level", list(range(0, 11)),
+            f"{r} {t['boost_level'][lang_code]}",
+            list(range(0, 11)),
             index=st.session_state.research_levels[r],
             key=f"research_{r}"
         )
-    st.success("All research boosts saved. Go to next tab to calculate score!")
+    st.success(t["saved_msg"][lang_code])
 
 with tab2:
-    st.header("VS Duel Day Calculator")
-    day_selected = st.selectbox("📅 Choose Day", list(vs_duel_days_data.keys()))
+    st.header(t["duel_tab"][lang_code])
+    day_selected = st.selectbox(t["select_day"][lang_code], list(vs_duel_days_data.keys()))
     tasks = vs_duel_days_data[day_selected]
 
     total_score = 0
-    st.subheader(f"Tasks for {day_selected}")
+    st.subheader(f"{t['task_label'][lang_code]} {day_selected}")
     for task, base_points in tasks.items():
         input_key = f"{day_selected}_{task}_input"
         qty = st.number_input(f"{task}", min_value=0, value=0, step=1, key=input_key)
 
-        # Calculate boost %
         boost_pct = 0
         if task in task_to_research:
             boost_pct += st.session_state.research_levels.get(task_to_research[task], 0) * 5
@@ -169,6 +173,6 @@ with tab2:
         points = qty * base_points * (1 + boost_pct / 100)
         total_score += points
 
-        st.write(f"→ {int(points):,} points (Base: {base_points} × Qty: {qty} × Boost: +{boost_pct}%)")
+        st.write(f"→ {int(points):,} {t['points_label'][lang_code]} (Base: {base_points} × Qty: {qty} × Boost: +{boost_pct}%)")
 
-    st.success(f"🏆 Total Score for {day_selected}: {int(total_score):,} points")
+    st.success(f"{t['total_label'][lang_code]} {day_selected}: {int(total_score):,} {t['points_label'][lang_code]}")
